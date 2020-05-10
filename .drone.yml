@@ -1,0 +1,37 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: lint
+    image: sdesbure/yamllint
+    commands:
+      - yamllint -d relaxed .drone.yml
+  - name: test
+    depends_on:
+      - lint
+    image: golang:1.14
+    environment:
+      HYBRID_ANALYSIS_API_KEY:
+        from_secret: HYBRID_ANALYSIS_API_KEY
+    commands:
+      - echo success
+  - name: build
+    depends_on:
+      - lint
+    image: golang:1.14
+    environment:
+      HYBRID_ANALYSIS_API_KEY:
+        from_secret: HYBRID_ANALYSIS_API_KEY
+      CGO_ENABLED: "0"
+    commands:
+      - echo success
+  - name: run
+    depends_on:
+      - build
+    image: alpine:3.11.6
+    environment:
+      HYBRID_ANALYSIS_API_KEY:
+        from_secret: HYBRID_ANALYSIS_API_KEY
+    commands:
+      - echo success
